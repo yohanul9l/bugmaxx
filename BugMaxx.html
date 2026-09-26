@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BUGMAXX // Elite Tech & Hackathon Division</title>
+  
+  <!-- Premium Fonts: Syne, Plus Jakarta Sans, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Syne:wght@600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            display: ['Syne', 'sans-serif'],
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            neon: {
+              cyan: '#00F0FF',
+              blue: '#0066FF',
+              purple: '#7928CA',
+              pink: '#FF0080',
+              emerald: '#00F5A0',
+            }
+          },
+          animation: {
+            'float': 'float 6s cubic-bezier(0.4, 0, 0.2, 1) infinite',
+            'pulse-glow': 'pulseGlow 5s ease-in-out infinite alternate',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-14px)' },
+            },
+            pulseGlow: {
+              '0%': { opacity: '0.25', transform: 'scale(0.96)' },
+              '100%': { opacity: '0.55', transform: 'scale(1.04)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 7px; }
+    ::-webkit-scrollbar-track { background: #030712; }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #00F0FF; }
+
+    /* Futuristic Cyber Grid */
+    .bg-grid {
+      background-size: 55px 55px;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    }
+
+    /* Glassmorphic Card */
+    .glass-card {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      position: relative;
+      overflow: hidden;
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .glass-card:hover {
+      border-color: rgba(0, 240, 255, 0.4);
+      transform: translateY(-5px);
+      box-shadow: 0 25px 45px -15px rgba(0, 240, 255, 0.15), inset 0 0 25px rgba(0, 240, 255, 0.04);
+    }
+    .card-spotlight {
+      pointer-events: none;
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      background: radial-gradient(450px circle at var(--mouse-x, 0) var(--mouse-y, 0), rgba(0, 240, 255, 0.15), transparent 80%);
+    }
+    .glass-card:hover .card-spotlight { opacity: 1; }
+
+    /* High Contrast Mode Styles */
+    body.high-contrast {
+      background-color: #000000 !important;
+      color: #ffffff !important;
+    }
+    body.high-contrast .glass-card {
+      background: #000000 !important;
+      border: 2px solid #00F0FF !important;
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.4) !important;
+    }
+    body.high-contrast .text-gray-300,
+    body.high-contrast .text-gray-400 {
+      color: #f1f5f9 !important;
+    }
+  </style>
+</head>
+
+<body class="bg-[#030712] text-slate-100 font-sans antialiased overflow-x-hidden relative selection:bg-neon-cyan selection:text-black bg-grid">
+
+  <!-- Interactive Ambient Glow -->
+  <div id="ambient-glow" class="fixed top-0 left-0 w-[550px] h-[550px] rounded-full pointer-events-none -translate-x-1/2 -translate-y-1/2 bg-gradient-to-r from-neon-blue/20 via-neon-purple/20 to-neon-cyan/20 blur-[130px] mix-blend-screen z-30 transition-transform duration-75 ease-out"></div>
+
+  <!-- Particle Canvas -->
+  <canvas id="particles" class="fixed inset-0 pointer-events-none z-0 opacity-60"></canvas>
+
+  <!-- Ambient Blurred Radial Blobs -->
+  <div class="fixed top-24 left-1/2 -translate-x-1/2 w-[900px] h-[450px] bg-gradient-to-tr from-neon-purple/20 via-neon-blue/20 to-neon-cyan/15 blur-[160px] pointer-events-none rounded-full z-0 animate-pulse-glow"></div>
+
+  <!-- Header / Navigation -->
+  <header class="fixed top-0 inset-x-0 z-50 backdrop-blur-xl bg-black/50 border-b border-white/[0.08]">
+    <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      <a href="#" class="flex items-center gap-3">
+        <div class="relative w-3.5 h-3.5">
+          <span class="absolute inset-0 rounded-full bg-neon-cyan animate-ping opacity-75"></span>
+          <span class="relative block w-3.5 h-3.5 rounded-full bg-neon-cyan shadow-[0_0_12px_#00F0FF]"></span>
+        </div>
+        <span class="font-display font-extrabold tracking-wider text-xl bg-gradient-to-r from-neon-cyan via-white to-neon-purple bg-clip-text text-transparent">
+          BUGMAXX<span class="text-neon-cyan text-sm align-super font-mono ml-1">v3.5</span>
+        </span>
+      </a>
+      
+      <nav class="hidden md:flex items-center gap-8 text-xs font-mono tracking-widest uppercase text-gray-400">
+        <a href="#about" class="hover:text-neon-cyan transition-colors">01 // About</a>
+        <a href="#team" class="hover:text-neon-cyan transition-colors">02 // Team</a>
+        <a href="#skills" class="hover:text-neon-cyan transition-colors">03 // Arsenal</a>
+        <a href="#achievements" class="hover:text-neon-cyan transition-colors">04 // Honors</a>
+        <a href="#bugmaxx" class="text-neon-cyan font-bold hover:underline">05 // BugMaxx</a>
+      </nav>
+
+      <a href="#bugmaxx" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-neon-cyan/50 bg-neon-cyan/10 hover:bg-neon-cyan/20 text-neon-cyan text-xs font-mono font-bold tracking-widest uppercase transition-all duration-300 shadow-[0_0_20px_rgba(0,240,255,0.25)] hover:scale-105 active:scale-95">
+        BugMaxx <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+      </a>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="relative z-10 pt-44 pb-32 md:pt-56 md:pb-44 px-6 max-w-6xl mx-auto text-center">
+    <div class="inline-flex items-center gap-2.5 px-4 py-2 rounded-full border border-neon-cyan/40 bg-neon-cyan/5 text-neon-cyan text-xs font-mono tracking-widest uppercase mb-8 animate-float shadow-[0_0_20px_rgba(0,240,255,0.15)]">
+      <i data-lucide="shield-alert" class="w-4 h-4 text-neon-cyan"></i>
+      National Hackathon Engineering Squad
+    </div>
+
+    <h1 class="font-display text-5xl sm:text-7xl md:text-8xl font-black tracking-tight leading-[1.05] mb-8">
+      Innovating Tomorrow, <br />
+      <span class="bg-gradient-to-r from-neon-cyan via-white to-neon-purple bg-clip-text text-transparent">
+        Building Today.
+      </span>
+    </h1>
+
+    <p class="max-w-2xl mx-auto text-gray-300 text-lg md:text-xl font-normal leading-relaxed mb-12">
+      An elite cross-functional unit merging robotics, high-throughput cloud infrastructure, 
+      viral 3D game engines, and intelligent accessible assistive technology.
+    </p>
+
+    <!-- Fixed Hero Buttons with Identical Font & Uniform Dimensions -->
+    <div class="flex flex-col sm:flex-row items-center justify-center gap-5">
+      <a href="#bugmaxx" class="w-full sm:w-auto px-9 py-4 rounded-xl bg-gradient-to-r from-neon-cyan via-neon-blue to-neon-purple text-black font-display font-extrabold tracking-wide transition-all duration-300 hover:shadow-[0_0_40px_rgba(0,240,255,0.6)] hover:scale-105 active:scale-95 text-center">
+        Explore BugMaxx System
+      </a>
+      <a href="https://www.roblox.com/games/10277607801/Apeirophobia" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto px-9 py-4 rounded-xl border border-white/15 bg-white/5 backdrop-blur-md text-white font-display font-extrabold tracking-wide hover:bg-white/10 hover:border-white/30 transition-all duration-300 flex items-center justify-center gap-2 group hover:scale-105 active:scale-95">
+        <span>Play Apeirophobia</span>
+        <i data-lucide="external-link" class="w-4 h-4 text-neon-cyan group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"></i>
+      </a>
+    </div>
+  </section>
+
+  <!-- About Team Section -->
+  <section id="about" class="relative z-10 py-24 px-6 max-w-7xl mx-auto border-t border-white/[0.08]">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-16">
+      <div>
+        <span class="text-neon-cyan font-mono text-xs tracking-widest uppercase">// 01 • Philosophy</span>
+        <h2 class="font-display text-3xl md:text-5xl font-bold mt-2 tracking-tight">
+          Precision execution at hackathon speed.
+        </h2>
+      </div>
+      <p class="text-gray-400 text-base md:text-lg leading-relaxed">
+        We bridge hardware and software with high-fidelity creative immersion. Whether tuning high-stress mechanical tolerances, querying complex multi-tenant datasets, or crafting viral game atmospheres, our squad builds production-grade proofs of concept in hours.
+      </p>
+    </div>
+
+    <!-- Statistics Grid -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+      <div class="glass-card rounded-2xl p-6 text-center">
+        <div class="card-spotlight"></div>
+        <div class="font-display text-4xl md:text-5xl font-black bg-gradient-to-r from-neon-cyan to-white bg-clip-text text-transparent">12+</div>
+        <div class="font-semibold text-white mt-1 text-sm">Podium Finishes</div>
+        <div class="text-xs font-mono text-gray-500 mt-0.5">National & State Level</div>
+      </div>
+      <div class="glass-card rounded-2xl p-6 text-center">
+        <div class="card-spotlight"></div>
+        <div class="font-display text-4xl md:text-5xl font-black bg-gradient-to-r from-neon-purple to-white bg-clip-text text-transparent">4+ Yrs</div>
+        <div class="font-semibold text-white mt-1 text-sm">Production Stack</div>
+        <div class="text-xs font-mono text-gray-500 mt-0.5">Python & Cloud Data</div>
+      </div>
+      <div class="glass-card rounded-2xl p-6 text-center">
+        <div class="card-spotlight"></div>
+        <div class="font-display text-4xl md:text-5xl font-black bg-gradient-to-r from-neon-blue to-white bg-clip-text text-transparent">430M+</div>
+        <div class="font-semibold text-white mt-1 text-sm">Apeirophobia Plays</div>
+        <div class="text-xs font-mono text-gray-500 mt-0.5">Worldwide Global Hit</div>
+      </div>
+      <div class="glass-card rounded-2xl p-6 text-center">
+        <div class="card-spotlight"></div>
+        <div class="font-display text-4xl md:text-5xl font-black bg-gradient-to-r from-neon-pink to-white bg-clip-text text-transparent">95%</div>
+        <div class="font-semibold text-white mt-1 text-sm">Pitch Approval Rate</div>
+        <div class="text-xs font-mono text-gray-500 mt-0.5">Grand Jury Scores</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Team Members Section -->
+  <section id="team" class="relative z-10 py-24 px-6 max-w-7xl mx-auto border-t border-white/[0.08]">
+    <div class="text-center max-w-2xl mx-auto mb-16">
+      <span class="text-neon-purple font-mono text-xs tracking-widest uppercase">// 02 • Operatives</span>
+      <h2 class="font-display text-3xl md:text-5xl font-bold mt-2 tracking-tight">The Innovation Roster</h2>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <!-- 1. Shreyas -->
+      <div class="glass-card rounded-3xl p-8 flex flex-col justify-between">
+        <div class="card-spotlight"></div>
+        <div>
+          <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-4">
+              <div class="p-3.5 rounded-2xl bg-neon-cyan/10 border border-neon-cyan/30 text-neon-cyan">
+                <i data-lucide="cpu" class="w-7 h-7"></i>
+              </div>
+              <div>
+                <h3 class="font-display text-2xl font-bold text-white tracking-tight">Shreyas</h3>
+                <p class="text-sm font-mono text-neon-cyan">Team Captain // Robotics & IoT Lead</p>
+              </div>
+            </div>
+            <span class="px-3 py-1 rounded-full text-[10px] font-mono tracking-widest font-bold border border-neon-cyan/40 bg-neon-cyan/10 text-neon-cyan">CAPTAIN</span>
+          </div>
+          <p class="text-gray-300 text-sm leading-relaxed mb-6 font-light">
+            Spearheads embedded robotics and automotive telemetry. Award winner at F1 in Schools National Finals with consecutive state & national competition victories.
+          </p>
+          <ul class="space-y-2 mb-6 text-xs text-gray-300">
+            <li class="flex items-center gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-neon-cyan"></i> F1 in Schools National Finals Award Winner</li>
+            <li class="flex items-center gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-neon-cyan"></i> Multiple National & State-Level Competition Winner</li>
+          </ul>
+        </div>
+        <div class="flex flex-wrap gap-2 pt-4 border-t border-white/10">
+          <span class="text-xs px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-gray-300 font-mono">#Robotics</span>
+          <span class="text-xs px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-gray-300 font-mono">#IoT</span>
+          <span class="text-xs px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-gray-300 font-mono">#Automotive</span>
+        </div>
+      </div>
+
+      <!-- 2. Ann -->
+      <div class="glass-card rounded-3xl p-8 flex flex-col justify-between">
+        <div class="card-spotlight"></div>
+        <div>
+          <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-4">
+              <div class="p-3.5 rounded-2xl bg-neon-purple/10 border border-neon-purple/30 text-neon-purple">
+                <i data-lucide="terminal" class="w-7 h-7"></i>
+              </div>
+              <div>
+                <h3 class="font-display text-2xl font-bold text-white tracking-tight">Ann</h3>
+                <p class="text-sm font-mono text-neon-purple">Full Stack Engineer // SQL & Python</p>
+              </div>
+            </div>
+            <span class="px-3 py-1 rounded-full text-[10px] font-mono tracking-widest font-bold border border-neon-purple/40 bg-neon-purple/10 text-neon-purple">ENG</span>
+          </div>
+          <p class="text-gray-300 text-sm leading-relaxed mb-6 font-light">
+            4+ years of dedicated software development experience. High-speed database engineering, Python algorithms, and responsive UI/UX architecture.
+          </p>
+          <ul class="space-y-2 mb-6 text-xs text-gray-300">
+            <li class="flex items-center gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-neon-purple"></i> 4+ Years Production Development Experience</li>
+            <li class="flex items-center gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-neon-purple"></i> Advanced SQL Optimization & Full-Stack Systems</li>
+          </ul>
+        </div>
+        <div class="flex flex-wrap gap-2 pt-4 border-t border-white/10">
+          <span class="text-xs px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-gray-300 font-mono">#Python</span>
+          <span class="text-xs px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-gray-300 font-mono">#SQL</span>
+          <span class="text-xs px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-gray-300 font-mono">#FullStack</span>
+        </div>
+      </div>
+
+      <!-- 3. Yohan -->
+      <div class="glass-card rounded-3xl p-8 flex flex-col justify-between">
+        <div class="card-spotlight"></div>
+        <div>
+          <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-4">
+              <div class="p-3.5 rounded-2xl bg-neon-blue/10 border border-neon-blue/30 text-neon-blue">
+                <i data-lucide="gamepad-2" class="w-7 h-7"></i>
+              </div>
+              <div>
+                <h3 class="font-display text-2xl font-bold text-white tracking-tight">Yohan</h3>
+                <p class="text-sm font-mono text-neon-blue">3D Specialist // Game Creator</p>
+              </div>
+            </div>
+            <span class="px-3 py-1 rounded-full text-[10px] font-mono tracking-widest font-bold border border-neon-blue/40 bg-neon-blue/10 text-neon-blue">CREATOR</span>
+          </div>
+          <p class="text-gray-300 text-sm leading-relaxed mb-4 font-light">
+            Creator of the viral title <strong>Apeirophobia</strong>. Expert in spatial environments, 3D assets, procedural gameplay mechanics, and immersive UI/UX.
+          </p>
+          <a href="https://www.roblox.com/games/10277607801/Apeirophobia" target="_blank" rel="noopener noreferrer" class="mb-6 block p-3 rounded-xl bg-white/[0.03] border border-neon-cyan/30 hover:border-neon-cyan transition-all flex items-center justify-between text-xs font-mono">
+            <span>PLAY APEIROPHOBIA (430M+ PLAYS)</span>
+            <i data-lucide="external-link" class="w-3.5 h-3.5 text-neon-cyan"></i>
+          </a>
+        </div>
+        <div class="flex flex-wrap gap-2 pt-4 border-t border-white/10">
+          <span class="text-xs px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-gray-300 font-mono">#Apeirophobia</span>
+          <span class="text-xs px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-gray-300 font-mono">#GameDev</span>
+          <span class="text-xs px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-gray-300 font-mono">#3DDesign</span>
+        </div>
+      </div>
+
+      <!-- 4. Rishith -->
+      <div class="glass-card rounded-3xl p-8 flex flex-col justify-between">
+        <div class="card-spotlight"></div>
+        <div>
+          <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-4">
+              <div class="p-3.5 rounded-2xl bg-neon-pink/10 border border-neon-pink/30 text-neon-pink">
+                <i data-lucide="presentation" class="w-7 h-7"></i>
+              </div>
+              <div>
+                <h3 class="font-display text-2xl font-bold text-white tracking-tight">Rishith</h3>
+                <p class="text-sm font-mono text-neon-pink">Presentation Manager // Pitch Lead</p>
+              </div>
+            </div>
+            <span class="px-3 py-1 rounded-full text-[10px] font-mono tracking-widest font-bold border border-neon-pink/40 bg-neon-pink/10 text-neon-pink">STRATEGY</span>
+          </div>
+          <p class="text-gray-300 text-sm leading-relaxed mb-6 font-light">
+            Distills intricate hardware and cloud platforms into winning keynote presentations. Experienced podium finisher across school, district, and state stages.
+          </p>
+          <ul class="space-y-2 mb-6 text-xs text-gray-300">
+            <li class="flex items-center gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-neon-pink"></i> Multiple School & District Competition Winner</li>
+            <li class="flex items-center gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-neon-pink"></i> State-Level Presentation & Pitch Experience</li>
+          </ul>
+        </div>
+        <div class="flex flex-wrap gap-2 pt-4 border-t border-white/10">
+          <span class="text-xs px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-gray-300 font-mono">#Keynote</span>
+          <span class="text-xs px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-gray-300 font-mono">#PitchMaster</span>
+          <span class="text-xs px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-gray-300 font-mono">#Communication</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Skills Arsenal -->
+  <section id="skills" class="relative z-10 py-24 px-6 max-w-7xl mx-auto border-t border-white/[0.08]">
+    <div class="text-center max-w-2xl mx-auto mb-16">
+      <span class="text-neon-cyan font-mono text-xs tracking-widest uppercase">// 03 • Arsenal</span>
+      <h2 class="font-display text-3xl md:text-5xl font-bold mt-2 tracking-tight">Core Competencies</h2>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="glass-card rounded-2xl p-6">
+        <div class="card-spotlight"></div>
+        <div class="flex justify-between items-center mb-3 text-sm font-semibold">
+          <span>Robotics & IoT Telemetry</span>
+          <span class="font-mono text-neon-cyan">96%</span>
+        </div>
+        <div class="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
+          <div class="bg-gradient-to-r from-neon-blue to-neon-cyan h-full rounded-full w-[96%]"></div>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-6">
+        <div class="card-spotlight"></div>
+        <div class="flex justify-between items-center mb-3 text-sm font-semibold">
+          <span>Python & SQL Data Infrastructure</span>
+          <span class="font-mono text-neon-purple">95%</span>
+        </div>
+        <div class="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
+          <div class="bg-gradient-to-r from-neon-blue to-neon-purple h-full rounded-full w-[95%]"></div>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-6">
+        <div class="card-spotlight"></div>
+        <div class="flex justify-between items-center mb-3 text-sm font-semibold">
+          <span>3D Modeling & Real-Time Simulation</span>
+          <span class="font-mono text-neon-pink">93%</span>
+        </div>
+        <div class="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
+          <div class="bg-gradient-to-r from-neon-purple to-neon-pink h-full rounded-full w-[93%]"></div>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-6">
+        <div class="card-spotlight"></div>
+        <div class="flex justify-between items-center mb-3 text-sm font-semibold">
+          <span>Presentation & Technical Pitching</span>
+          <span class="font-mono text-neon-cyan">98%</span>
+        </div>
+        <div class="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
+          <div class="bg-gradient-to-r from-neon-blue to-neon-cyan h-full rounded-full w-[98%]"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Honors Section -->
+  <section id="achievements" class="relative z-10 py-24 px-6 max-w-7xl mx-auto border-t border-white/[0.08]">
+    <div class="text-center max-w-2xl mx-auto mb-16">
+      <span class="text-neon-blue font-mono text-xs tracking-widest uppercase">// 04 • Honors</span>
+      <h2 class="font-display text-3xl md:text-5xl font-bold mt-2 tracking-tight">Verified Honors</h2>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div class="glass-card rounded-3xl p-8 flex flex-col justify-between">
+        <div class="card-spotlight"></div>
+        <div>
+          <span class="font-mono text-xs font-bold text-neon-cyan tracking-wider block mb-4">NATIONAL FINALIST</span>
+          <h3 class="font-display text-xl font-bold mb-2 text-white">F1 in Schools National Finals Award</h3>
+          <p class="text-gray-400 text-sm leading-relaxed">Recognized for aerodynamic research, structural telemetry, and high-performance engineering.</p>
+        </div>
+        <div class="mt-6 pt-4 border-t border-white/10 text-xs text-neon-cyan font-mono">#NationalAwardWinner</div>
+      </div>
+
+      <div class="glass-card rounded-3xl p-8 flex flex-col justify-between">
+        <div class="card-spotlight"></div>
+        <div>
+          <span class="font-mono text-xs font-bold text-neon-purple tracking-wider block mb-4">VIRAL PRODUCTION</span>
+          <h3 class="font-display text-xl font-bold mb-2 text-white">Apeirophobia Game Release</h3>
+          <p class="text-gray-400 text-sm leading-relaxed">Created by Yohan, capturing over 430 million sessions with industry acclaim for procedural immersion.</p>
+        </div>
+        <div class="mt-6 pt-4 border-t border-white/10 text-xs text-neon-purple font-mono">#430M+RobloxPlays</div>
+      </div>
+
+      <div class="glass-card rounded-3xl p-8 flex flex-col justify-between">
+        <div class="card-spotlight"></div>
+        <div>
+          <span class="font-mono text-xs font-bold text-neon-pink tracking-wider block mb-4">STATE PODIUMS</span>
+          <h3 class="font-display text-xl font-bold mb-2 text-white">Consecutive Multi-Level Championships</h3>
+          <p class="text-gray-400 text-sm leading-relaxed">State-level championships across robotics, presentation keynotes, and database application sprints.</p>
+        </div>
+        <div class="mt-6 pt-4 border-t border-white/10 text-xs text-neon-pink font-mono">#StateChampionships</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================== -->
+  <!-- Section 05: BUGMAXX FLAGSHIP ACCESSIBILITY PLATFORM SHOWCASE  -->
+  <!-- ============================================================== -->
+  <section id="bugmaxx" class="relative z-10 py-28 px-6 max-w-7xl mx-auto border-t border-white/[0.08]">
+    
+    <!-- Section Header & Accessibility Controls -->
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
+      <div>
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-neon-cyan/40 bg-neon-cyan/10 text-neon-cyan text-xs font-mono tracking-widest uppercase mb-4 shadow-[0_0_20px_rgba(0,240,255,0.2)]">
+          <i data-lucide="shield-check" class="w-4 h-4"></i> Flagship Hackathon System // HealthTech & IoT
+        </div>
+        <h2 class="font-display text-4xl sm:text-6xl font-black tracking-tight text-white">
+          Bug<span class="bg-gradient-to-r from-neon-cyan via-white to-neon-purple bg-clip-text text-transparent">Maxx</span>
+        </h2>
+        <p class="text-gray-300 text-lg md:text-xl font-light mt-3 max-w-2xl leading-relaxed">
+          An intelligent multi-device ecosystem bridging smart glasses, watches, and AI to grant independence to people with disabilities and complete peace of mind to caregivers.
+        </p>
+      </div>
+
+      <!-- Live Accessibility High Contrast Switch -->
+      <div class="flex items-center gap-3 bg-white/5 border border-white/10 p-2.5 rounded-2xl backdrop-blur-xl">
+        <i data-lucide="eye" class="w-4 h-4 text-neon-cyan ml-2"></i>
+        <span class="text-xs font-mono text-gray-300">HIGH-CONTRAST MODE:</span>
+        <button id="toggle-contrast-btn" onclick="toggleHighContrast()" class="px-3 py-1.5 rounded-xl bg-neon-cyan/20 border border-neon-cyan/50 text-neon-cyan text-xs font-mono font-bold hover:bg-neon-cyan hover:text-black transition-all">
+          OFF
+        </button>
+      </div>
+    </div>
+
+    <!-- Problem & Solution Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+      <div class="glass-card rounded-3xl p-8 border-neon-pink/30 relative">
+        <div class="card-spotlight"></div>
+        <div class="flex items-center gap-3 mb-4">
+          <div class="p-2.5 rounded-xl bg-neon-pink/10 border border-neon-pink/30 text-neon-pink">
+            <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+          </div>
+          <span class="font-mono text-xs text-neon-pink tracking-widest uppercase font-bold">The Critical Challenge</span>
+        </div>
+        <h3 class="font-display text-2xl font-bold text-white mb-3">Isolation & Delayed Emergency Response</h3>
+        <p class="text-gray-300 text-sm leading-relaxed font-light">
+          Over 1.3 billion people live with disabilities. Physical barriers, sudden falls, and inaccessible navigation create perpetual anxiety for individuals, while caregivers lack non-intrusive, reliable telemetry to intervene before emergencies escalate.
+        </p>
+      </div>
+
+      <div class="glass-card rounded-3xl p-8 border-neon-cyan/30 relative">
+        <div class="card-spotlight"></div>
+        <div class="flex items-center gap-3 mb-4">
+          <div class="p-2.5 rounded-xl bg-neon-cyan/10 border border-neon-cyan/30 text-neon-cyan">
+            <i data-lucide="sparkles" class="w-5 h-5"></i>
+          </div>
+          <span class="font-mono text-xs text-neon-cyan tracking-widest uppercase font-bold">The BugMaxx Engine</span>
+        </div>
+        <h3 class="font-display text-2xl font-bold text-white mb-3">Unified IoT Wearables & Real-Time AI</h3>
+        <p class="text-gray-300 text-sm leading-relaxed font-light">
+          BugMaxx unifies smart watches, AR smart glasses, and smartphones into a synchronized guardian system featuring sub-3-second emergency broadcasts, automated computer vision obstacle detection, and live geofenced caregiver monitoring.
+        </p>
+      </div>
+    </div>
+
+    <!-- Interactive Live Caregiver & Telemetry Console -->
+    <div class="glass-card rounded-3xl border border-white/15 overflow-hidden mb-16 shadow-2xl">
+      <div class="card-spotlight"></div>
+
+      <!-- Console Top Bar -->
+      <div class="p-5 border-b border-white/10 bg-white/[0.02] flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <span class="w-3 h-3 rounded-full bg-neon-emerald animate-pulse"></span>
+          <span class="font-mono text-xs tracking-wider text-white font-bold">SYSTEM STATUS: ALL SENSORS LINKED // WEBSOCKET LIVE</span>
+        </div>
+        <!-- Module Tabs (Clean Vector Icons, No Emojis) -->
+        <div class="flex flex-wrap gap-2 text-xs font-mono" id="dashboard-tabs">
+          <button onclick="switchTab('sos')" id="tab-btn-sos" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl border border-neon-cyan bg-neon-cyan/20 text-neon-cyan font-bold transition-all">
+            <i data-lucide="activity" class="w-3.5 h-3.5"></i>
+            <span>SOS & Fall AI</span>
+          </button>
+          <button onclick="switchTab('wearables')" id="tab-btn-wearables" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl border border-white/10 bg-white/5 text-gray-400 hover:text-white transition-all">
+            <i data-lucide="watch" class="w-3.5 h-3.5"></i>
+            <span>Smart Wearables</span>
+          </button>
+          <button onclick="switchTab('map')" id="tab-btn-map" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl border border-white/10 bg-white/5 text-gray-400 hover:text-white transition-all">
+            <i data-lucide="map-pin" class="w-3.5 h-3.5"></i>
+            <span>Accessibility Map</span>
+          </button>
+          <button onclick="switchTab('assistant')" id="tab-btn-assistant" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl border border-white/10 bg-white/5 text-gray-400 hover:text-white transition-all">
+            <i data-lucide="scan" class="w-3.5 h-3.5"></i>
+            <span>Visual & Audio AI</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- TAB 1: SOS & FALL DETECTION SIMULATION -->
+      <div id="tab-content-sos" class="p-8 grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
+        <div class="lg:col-span-1 text-center p-8 rounded-2xl bg-black/40 border border-neon-pink/30 flex flex-col items-center">
+          <span class="text-xs font-mono text-neon-pink font-bold uppercase tracking-widest mb-3">ONE-TAP EMERGENCY PROTOCOL</span>
+          <button id="sos-trigger-btn" onclick="triggerSosDemo()" class="w-36 h-36 rounded-full bg-gradient-to-tr from-neon-pink via-red-600 to-neon-purple text-white font-display font-black text-2xl shadow-[0_0_40px_rgba(255,0,128,0.5)] hover:scale-105 active:scale-95 transition-transform flex flex-col items-center justify-center gap-1 border-4 border-white/30">
+            <i data-lucide="radio" class="w-7 h-7 animate-pulse"></i>
+            <span>SOS</span>
+          </button>
+          <span id="sos-status-label" class="text-xs font-mono text-gray-400 mt-4">Tap to simulate emergency broadcast</span>
+        </div>
+
+        <div class="lg:col-span-2 space-y-4">
+          <div class="p-5 rounded-2xl bg-white/[0.02] border border-white/10 flex items-start justify-between">
+            <div>
+              <h4 class="font-bold text-white text-base flex items-center gap-2">
+                <i data-lucide="activity" class="w-4 h-4 text-neon-cyan"></i>
+                AI Fall Detection & Sensor Telemetry
+              </h4>
+              <p class="text-xs text-gray-400 mt-1">Multi-axis gyroscope & accelerometer model running at 50Hz on Smart Watch</p>
+            </div>
+            <span class="text-xs font-mono px-2.5 py-1 rounded-md bg-neon-emerald/15 text-neon-emerald border border-neon-emerald/30 font-bold">ARMED</span>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-white/[0.02] border border-white/10">
+            <div class="flex justify-between items-center text-xs font-mono mb-2">
+              <span class="text-gray-300">Emergency Cancellation Timer (False Alarm Buffer)</span>
+              <span id="countdown-val" class="text-neon-cyan font-bold">READY (10s Countdown)</span>
+            </div>
+            <div class="w-full bg-white/10 h-2 rounded-full overflow-hidden">
+              <div id="countdown-bar" class="h-full bg-gradient-to-r from-neon-cyan to-neon-pink w-0 transition-all duration-300"></div>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-xl bg-neon-blue/10 border border-neon-blue/30 text-xs text-gray-300 flex items-center gap-3">
+            <i data-lucide="map-pin" class="w-5 h-5 text-neon-cyan shrink-0"></i>
+            <span>Live Dispatch: Broadcasts reverse-geocoded coordinates, medical IDs, and battery state across WebSockets to all registered family contacts.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: WEARABLE SYNCHRONIZATION -->
+      <div id="tab-content-wearables" class="p-8 hidden grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="p-6 rounded-2xl bg-white/[0.02] border border-white/10">
+          <div class="flex items-center justify-between mb-4">
+            <i data-lucide="watch" class="w-6 h-6 text-neon-cyan"></i>
+            <span class="text-[11px] font-mono text-neon-emerald font-bold">CONNECTED // 94%</span>
+          </div>
+          <h4 class="font-bold text-white text-base">BugMaxx Watch OS</h4>
+          <p class="text-xs text-gray-400 mt-1">Continuous heart-rate (76 BPM), SpO2 saturation, and accelerometer fall sensing.</p>
+        </div>
+
+        <div class="p-6 rounded-2xl bg-white/[0.02] border border-white/10">
+          <div class="flex items-center justify-between mb-4">
+            <i data-lucide="glasses" class="w-6 h-6 text-neon-purple"></i>
+            <span class="text-[11px] font-mono text-neon-emerald font-bold">CONNECTED // 87%</span>
+          </div>
+          <h4 class="font-bold text-white text-base">AR Smart Vision Glasses</h4>
+          <p class="text-xs text-gray-400 mt-1">Ultra-wide low-latency RGB camera with LiDAR depth for real-time obstacle cues.</p>
+        </div>
+
+        <div class="p-6 rounded-2xl bg-white/[0.02] border border-white/10">
+          <div class="flex items-center justify-between mb-4">
+            <i data-lucide="smartphone" class="w-6 h-6 text-neon-pink"></i>
+            <span class="text-[11px] font-mono text-neon-emerald font-bold">PRIMARY HUB</span>
+          </div>
+          <h4 class="font-bold text-white text-base">Mobile Edge Relay</h4>
+          <p class="text-xs text-gray-400 mt-1">On-device neural inference engine and Firebase cloud synchronization bridge.</p>
+        </div>
+      </div>
+
+      <!-- TAB 3: ACCESSIBILITY MAP -->
+      <div id="tab-content-map" class="p-8 hidden">
+        <div class="rounded-2xl border border-white/10 bg-black/50 p-6 relative overflow-hidden">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+            <div>
+              <h4 class="text-white font-bold text-lg">Urban Barrier-Free Routing Engine</h4>
+              <p class="text-xs text-gray-400">Filtering paths via curb ramps, verified elevators, and step-free entrances.</p>
+            </div>
+            <span class="px-3 py-1 rounded-full bg-neon-cyan/10 border border-neon-cyan/40 text-neon-cyan text-xs font-mono">
+              Live Safe Zone: GEOFENCE ACTIVE
+            </span>
+          </div>
+          
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+            <div class="p-4 rounded-xl bg-white/[0.03] border border-white/10">
+              <i data-lucide="navigation-2" class="w-5 h-5 text-neon-cyan mx-auto mb-1"></i>
+              <div class="font-mono text-lg font-bold text-white">100%</div>
+              <div class="text-[11px] text-gray-400">Ramp Verified</div>
+            </div>
+            <div class="p-4 rounded-xl bg-white/[0.03] border border-white/10">
+              <i data-lucide="building-2" class="w-5 h-5 text-neon-purple mx-auto mb-1"></i>
+              <div class="font-mono text-lg font-bold text-white">42 Locs</div>
+              <div class="text-[11px] text-gray-400">Accessible Lifts</div>
+            </div>
+            <div class="p-4 rounded-xl bg-white/[0.03] border border-white/10">
+              <i data-lucide="shield" class="w-5 h-5 text-neon-pink mx-auto mb-1"></i>
+              <div class="font-mono text-lg font-bold text-white">0 Breaches</div>
+              <div class="text-[11px] text-gray-400">Geofence Status</div>
+            </div>
+            <div class="p-4 rounded-xl bg-white/[0.03] border border-white/10">
+              <i data-lucide="users" class="w-5 h-5 text-neon-emerald mx-auto mb-1"></i>
+              <div class="font-mono text-lg font-bold text-white">Community</div>
+              <div class="text-[11px] text-gray-400">Crowdsourced Flags</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 4: VISUAL & HEARING ASSISTANT -->
+      <div id="tab-content-assistant" class="p-8 hidden grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="p-6 rounded-2xl bg-white/[0.02] border border-white/10">
+          <div class="flex items-center gap-3 mb-3">
+            <i data-lucide="eye" class="w-5 h-5 text-neon-cyan"></i>
+            <h4 class="font-bold text-white">Vision Support Layer</h4>
+          </div>
+          <p class="text-xs text-gray-400 mb-4">Object classification, low-hanging branch alerts, automated crosswalk signaling, and neural text-to-speech page parsing.</p>
+          <div class="p-3 rounded-xl bg-neon-cyan/5 border border-neon-cyan/20 text-neon-cyan text-xs font-mono">
+            STATUS: "Obstacle detected 2.1m ahead. Veer 15° Right."
+          </div>
+        </div>
+
+        <div class="p-6 rounded-2xl bg-white/[0.02] border border-white/10">
+          <div class="flex items-center gap-3 mb-3">
+            <i data-lucide="ear" class="w-5 h-5 text-neon-purple"></i>
+            <h4 class="font-bold text-white">Hearing Support Layer</h4>
+          </div>
+          <p class="text-xs text-gray-400 mb-4">Acoustic fingerprinting for sirens, alarms, doorbell rings, and spoken speech converted instantly into haptic taps and HUD captions.</p>
+          <div class="p-3 rounded-xl bg-neon-purple/5 border border-neon-purple/20 text-neon-purple text-xs font-mono">
+            HUD CAPTION: [Emergency Siren Detected — High Priority]
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 8 Major Feature Pillars Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="glass-card rounded-2xl p-6">
+        <div class="card-spotlight"></div>
+        <i data-lucide="bell-ring" class="w-6 h-6 text-neon-pink mb-3"></i>
+        <h4 class="font-bold text-white text-base mb-1">Instant SOS Broadcast</h4>
+        <p class="text-xs text-gray-400 leading-relaxed">Direct GPS coordinates, pre-set medical alerts, and automated multi-channel caregiver paging.</p>
+      </div>
+
+      <div class="glass-card rounded-2xl p-6">
+        <div class="card-spotlight"></div>
+        <i data-lucide="radar" class="w-6 h-6 text-neon-cyan mb-3"></i>
+        <h4 class="font-bold text-white text-base mb-1">AI Fall Detection</h4>
+        <p class="text-xs text-gray-400 leading-relaxed">Continuous IMU velocity monitoring with smart cancellation buffer to eradicate false alarms.</p>
+      </div>
+
+      <div class="glass-card rounded-2xl p-6">
+        <div class="card-spotlight"></div>
+        <i data-lucide="map" class="w-6 h-6 text-neon-blue mb-3"></i>
+        <h4 class="font-bold text-white text-base mb-1">Barrier-Free Maps</h4>
+        <p class="text-xs text-gray-400 leading-relaxed">Live routing mapped around slopes, elevators, accessible washrooms, and crowd alerts.</p>
+      </div>
+
+      <div class="glass-card rounded-2xl p-6">
+        <div class="card-spotlight"></div>
+        <i data-lucide="heart-pulse" class="w-6 h-6 text-neon-emerald mb-3"></i>
+        <h4 class="font-bold text-white text-base mb-1">Caregiver Telemetry</h4>
+        <p class="text-xs text-gray-400 leading-relaxed">Remote battery status, live pulse rate, medication alerts, and geofence exit triggers.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="relative z-10 py-12 border-t border-white/[0.08] text-center text-xs text-gray-500 font-mono">
+    <div class="flex justify-center items-center gap-6 mb-4">
+      <a href="#bugmaxx" class="hover:text-neon-cyan transition-colors">BugMaxx Platform</a>
+      <span>•</span>
+      <a href="https://www.roblox.com/games/10277607801/Apeirophobia" target="_blank" rel="noopener noreferrer" class="hover:text-neon-cyan transition-colors">Apeirophobia</a>
+      <span>•</span>
+      <a href="#team" class="hover:text-neon-cyan transition-colors">Team Roster</a>
+    </div>
+    <p>© 2026 BUGMAXX INNOVATION SQUAD // ASSISTIVE PLATFORM DIVISION.</p>
+  </footer>
+
+  <!-- Scripts -->
+  <script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    // 1. Mouse Follow Ambient Spotlight
+    const ambientGlow = document.getElementById('ambient-glow');
+    window.addEventListener('mousemove', (e) => {
+      ambientGlow.style.transform = `translate(${e.clientX - 275}px, ${e.clientY - 275}px)`;
+    });
+
+    // 2. Interactive Spotlight on Glass Cards
+    document.querySelectorAll('.glass-card').forEach((card) => {
+      card.addEventListener('mousemove', (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        card.style.setProperty('--mouse-x', `${x}px`);
+        card.style.setProperty('--mouse-y', `${y}px`);
+      });
+    });
+
+    // 3. Dynamic Particle Canvas
+    const canvas = document.getElementById('particles');
+    const ctx = canvas.getContext('2d');
+    let width = (canvas.width = window.innerWidth);
+    let height = (canvas.height = window.innerHeight);
+
+    window.addEventListener('resize', () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    });
+
+    const particles = [];
+    for (let i = 0; i < 55; i++) {
+      particles.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: (Math.random() - 0.5) * 0.35,
+        vy: (Math.random() - 0.5) * 0.35,
+        size: Math.random() * 2 + 1,
+        alpha: Math.random() * 0.5 + 0.2,
+      });
+    }
+
+    function renderParticles() {
+      ctx.clearRect(0, 0, width, height);
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 125) {
+            ctx.beginPath();
+            ctx.strokeStyle = `rgba(0, 240, 255, ${0.12 * (1 - dist / 125)})`;
+            ctx.lineWidth = 0.8;
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.stroke();
+          }
+        }
+      }
+      particles.forEach((p) => {
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.x < 0) p.x = width;
+        if (p.x > width) p.x = 0;
+        if (p.y < 0) p.y = height;
+        if (p.y > height) p.y = 0;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(0, 240, 255, ${p.alpha})`;
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = '#00F0FF';
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      });
+      requestAnimationFrame(renderParticles);
+    }
+    renderParticles();
+
+    // 4. Tab Switcher for BugMaxx Live Dashboard (Icon Preserving)
+    function switchTab(tabKey) {
+      const tabs = ['sos', 'wearables', 'map', 'assistant'];
+      tabs.forEach(t => {
+        const content = document.getElementById(`tab-content-${t}`);
+        const btn = document.getElementById(`tab-btn-${t}`);
+        if (t === tabKey) {
+          content.classList.remove('hidden');
+          btn.className = "inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl border border-neon-cyan bg-neon-cyan/20 text-neon-cyan font-bold transition-all";
+        } else {
+          content.classList.add('hidden');
+          btn.className = "inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl border border-white/10 bg-white/5 text-gray-400 hover:text-white transition-all";
+        }
+      });
+    }
+
+    // 5. Interactive SOS Trigger & Countdown Simulation
+    let sosTimer = null;
+    function triggerSosDemo() {
+      const label = document.getElementById('sos-status-label');
+      const countVal = document.getElementById('countdown-val');
+      const bar = document.getElementById('countdown-bar');
+
+      if (sosTimer) {
+        clearInterval(sosTimer);
+        sosTimer = null;
+        bar.style.width = '0%';
+        countVal.textContent = 'ABORTED // FALSE ALARM PREVENTED';
+        label.textContent = 'Tap to re-simulate emergency broadcast';
+        return;
+      }
+
+      let timeLeft = 10;
+      label.textContent = '⚠️ EMERGENCY ACTIVE! Tap SOS again to CANCEL';
+      bar.style.width = '100%';
+
+      sosTimer = setInterval(() => {
+        timeLeft--;
+        countVal.textContent = `BROADCASTING IN ${timeLeft}s (Tap to Cancel)`;
+        bar.style.width = `${(timeLeft / 10) * 100}%`;
+
+        if (timeLeft <= 0) {
+          clearInterval(sosTimer);
+          sosTimer = null;
+          countVal.textContent = '🚨 PACKET DISPATCHED TO 4 CAREGIVERS & EMS';
+          label.textContent = 'Coordinates & Medical ID Shared Live';
+          bar.style.width = '100%';
+        }
+      }, 1000);
+    }
+
+    // 6. High Contrast Mode Toggle
+    function toggleHighContrast() {
+      const body = document.body;
+      const btn = document.getElementById('toggle-contrast-btn');
+      body.classList.toggle('high-contrast');
+      if (body.classList.contains('high-contrast')) {
+        btn.textContent = 'ON';
+        btn.className = 'px-3 py-1.5 rounded-xl bg-neon-cyan text-black font-mono font-bold transition-all';
+      } else {
+        btn.textContent = 'OFF';
+        btn.className = 'px-3 py-1.5 rounded-xl bg-neon-cyan/20 border border-neon-cyan/50 text-neon-cyan text-xs font-mono font-bold hover:bg-neon-cyan hover:text-black transition-all';
+      }
+    }
+  </script>
+</body>
+</html>
